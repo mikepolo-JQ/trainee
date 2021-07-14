@@ -39,8 +39,8 @@ def make_format(*args) -> tuple:
     result = tuple()
 
     for string in args:
-        new_digits_string = ''
-        new_chars_string = ''
+        new_digits_string = str()
+        new_chars_string = str()
         for char in string:
             if char == '.':
                 new_chars_string += char
