@@ -4,16 +4,28 @@ class Version:
         self.ver = version
 
     def __lt__(self, other):
-        format_self, format_other = make_format(self.ver, other.ver)
+        digit_format_self, char_format_self, digit_format_other, char_format_other = \
+            make_format(self.ver, other.ver)
 
-        if format_self < format_other:
+        if digit_format_self == digit_format_other:
+            if char_format_self < char_format_other:
+                return True
+            return False
+
+        if digit_format_self < digit_format_other:
             return True
         return False
 
     def __gt__(self, other):
-        format_self, format_other = make_format(self.ver, other.ver)
+        digit_format_self, char_format_self, digit_format_other, char_format_other = \
+            make_format(self.ver, other.ver)
 
-        if format_self > format_other:
+        if digit_format_self == digit_format_other:
+            if char_format_self > char_format_other:
+                return True
+            return False
+
+        if digit_format_self > digit_format_other:
             return True
         return False
 
@@ -24,18 +36,21 @@ class Version:
 
 
 def make_format(*args) -> tuple:
-
     result = tuple()
 
-    for a in args:
-        new_string = ''
-        for char in a:
-            if not char.isdigit():
-                continue
+    for string in args:
+        new_digits_string = ''
+        new_chars_string = ''
+        for char in string:
+            if char == '.':
+                new_chars_string += char
+                new_digits_string += char
+            elif char.isdigit():
+                new_digits_string += char
+            else:
+                new_chars_string += char
 
-            new_string += char
-
-        result += (new_string,)
+        result += (new_digits_string, new_chars_string)
     return result
 
 
@@ -50,7 +65,6 @@ def main():
     ]
 
     for version_1, version_2 in to_test:
-        print(version_1, version_2)
         assert Version(version_1) < Version(version_2), 'le failed'
         assert Version(version_2) > Version(version_1), 'ge failed'
         assert Version(version_2) != Version(version_1), 'neq failed'
