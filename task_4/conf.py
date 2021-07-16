@@ -1,6 +1,0 @@
-
-DATABASE_NAME = "sql3425728"
-HOST = "sql3.freesqldatabase.com"
-PASSWORD = '9M1Wi1RSuS'
-USERNAME = 'sql3425728'
-PORT = 3306
