@@ -1,25 +1,31 @@
-
+import threading
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-a = 0
 
+class Adding:
+    def __init__(self):
+        self.a = 0
+        self._lock = threading.Lock()
 
-def function(arg):
-    global a
-
-    for _ in range(arg):
-        a += 1
-        time.sleep(0)
+    def plus_one(self, arg):
+        with self._lock:
+            for _ in range(arg):
+                self.a += 1
 
 
 def main():
     quantity = 5
+    obj = Adding()
+    start = time.time()
 
     with ThreadPoolExecutor(max_workers=quantity) as executor:
-        [executor.submit(function, 1000000) for _ in range(quantity)]
+        [executor.submit(obj.plus_one, 1000000) for _ in range(quantity)]
 
-    print("----------------------", a)  # !!!
+    finish = time.time()
+
+    print(f"Time to complete: {finish - start:.2f}")
+    print("----------------------", obj.a)  # !!!
 
 
 main()
