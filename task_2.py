@@ -1,3 +1,4 @@
+from functools import total_ordering
 
 weight_dict = {
     '': 0,
@@ -8,19 +9,20 @@ weight_dict = {
     'rc': 2,
     '-rc': 2,
 
-    'a': 100,
-    '-a': 100,
-    'alpha': 100,
-    '-alpha': 100,
+    'a': 3,
+    '-a': 3,
+    'alpha': 3,
+    '-alpha': 3,
 
-    'b': 101,
-    '-b': 101,
-    'beta': 101,
-    '-beta': 101,
+    'b': 4,
+    '-b': 4,
+    'beta': 4,
+    '-beta': 4,
 
 }
 
 
+@total_ordering
 class Version:
     def __init__(self, version: str):
         self.ver = version
