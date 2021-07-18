@@ -1,4 +1,5 @@
 import json
+import time
 
 
 def create_tables(connection, cursor):
@@ -18,7 +19,7 @@ def create_tables(connection, cursor):
 
     print("Table room created successfully")
 
-    create_relationship_table = "create table student_room(id int primary key," \
+    create_relationship_table = "create table student_room(id serial primary key," \
                                 "student_id integer references student(id)," \
                                 "room_id integer references room(id));"
     cursor.execute(create_relationship_table)
@@ -46,12 +47,77 @@ def drop_tables(connection, cursor):
     return True
 
 
-# def insert_data_into_tables(connection, cursor):
-#
-#     with open('students.json') as student_file:
-#         student_data = json.load(student_file)
-#
-#     print(student_data[0])
+def insert_into_student_table(connection, cursor):
+
+    with open('task_4/students.json') as student_file:
+        student_data = json.load(student_file)
+
+    values = str()
+    values_for_student_room = str()
+
+    start = time.time()
+    for student in student_data:
+        values += f"({student['id']}, '{student['name']}', '{student['birthday']}', '{student['sex']}')"
+
+        values_for_student_room += f"({student['id']}, {student['room']})"
+
+        if student['id'] != student_data[-1]['id']:
+            values += ', '
+            values_for_student_room += ', '
+
+    cursor.execute("insert student(id, name, birthday, sex) values " + values + ';')
+    connection.commit()
+
+    cursor.execute("insert student_room(student_id, room_id) values " +
+                   values_for_student_room + ';')
+    connection.commit()
+    finish = time.time()
+    print(f"Insert student and student_room successfully! Total time: {finish - start:.2f}")
+    return True
+
+
+def insert_into_room_table(connection, cursor):
+
+    with open('task_4/rooms.json') as room_file:
+        room_data = json.load(room_file)
+
+    values = str()
+
+    start = time.time()
+    for room in room_data:
+        values += f"({room['id']}, '{room['name']}')"
+
+        if room['id'] != room_data[-1]['id']:
+            values += ', '
+
+    cursor.execute("insert room(id, name) values " + values + ';')
+    connection.commit()
+
+    finish = time.time()
+
+    print(f"Insert room successfully! Total time: {finish - start:.2f}")
+
+    return True
+
+
+def insert_data_into_tables(connection, cursor):
+    insert_into_student_table(connection, cursor)
+    insert_into_room_table(connection, cursor)
+
+
+# database queries
+def get_rooms_and_the_number_of_students(connection, cursor):
+    sql_query = "SELECT room.name, COUNT(student_room.student_id) as 'students'" \
+                " FROM room left JOIN student_room on student_room.room_id=room.id " \
+                "GROUP BY room.name ORDER BY room.id"
+
+    cursor.execute(sql_query)
+
+    result = cursor.fetchall()
+
+    print(result)
+
+    return True
 
 
 def connection_close(connection, *args):
