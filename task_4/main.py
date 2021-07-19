@@ -7,9 +7,15 @@ command_dict = {
     'drop': db.drop_tables,
     'end': db.connection_close,
     'insert': db.insert_data_into_tables,
+    'clear': db.clear,
+    '?': db.print_command_list,
 
-    '1': db.get_rooms_and_the_number_of_students
+    '1': db.get_rooms_and_the_number_of_students,
+    '2': db.get_top5_young_rooms,
+    '3': db.get_top5_biggest_difference_in_the_age_rooms,
+    '4': db.get_rooms_with_difference_students_sex
 }
+
 
 try:
     # Connect to the database
@@ -26,28 +32,20 @@ try:
         with connection.cursor() as cursor:
             # Create a new record
 
-            print("""
-                Hello! U can use one of this command:
-                    create
-                    drop
-                    insert 
-                    end
-            """)
-
             while True:
 
-                command = input("Write u command...\n")
+                command = input("TASK_4 >>> ").lower()
 
                 try:
-                    result = command_dict[command]
+                    handler = command_dict[command]
                 except KeyError as ex:
-                    print("First! Bed request!")
+                    print("Bed request! Try '?' for see command list.")
                     continue
+
+                result = handler(connection, cursor)
 
                 if not result:
                     break
-
-                result(connection, cursor)
 
     finally:
         connection.close()
