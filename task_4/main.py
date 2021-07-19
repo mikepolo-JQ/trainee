@@ -47,6 +47,7 @@ try:
     db_helper = DB()
 
     try:
+        print('Welcome! Enter "?" to see the list of available commands.')
         while True:
 
             command = input("TASK_4 >>> ").lower()
@@ -64,6 +65,7 @@ try:
 
     finally:
         db_helper.__disconnect__()
+        print('Bye!')
 
 
 except Exception as ex:

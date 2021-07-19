@@ -16,7 +16,7 @@ sql_queries = {
                            "student_id integer references student(id)," \
                            "room_id integer references room(id));",
 
-    'get_room_name_and_count_of_students': "SELECT room.name, COUNT(student_room.student_id) as 'students'" \
+    'get_room_name_and_count_of_students':  "SELECT room.name, COUNT(student_room.student_id) as 'students'" \
                                             " FROM room left JOIN student_room on student_room.room_id=room.id " \
                                             "GROUP BY room.name",
 
@@ -27,15 +27,15 @@ sql_queries = {
                             "GROUP BY room.name ORDER BY AverageAge LIMIT 5",
 
     'biggest_difference_in_the_age': "SELECT room.name, YEAR(MAX(student.birthday))-" \
-                                    "YEAR(MIN(student.birthday)) as Difference from room " \
-                                    "LEFT JOIN student_room on student_room.room_id=room.id " \
-                                    "LEFT JOIN student on student_room.student_id=student.id " \
-                                    "GROUP BY room.name ORDER BY Difference DESC LIMIT 5",
+                                     "YEAR(MIN(student.birthday)) as Difference from room " \
+                                     "LEFT JOIN student_room on student_room.room_id=room.id " \
+                                     "LEFT JOIN student on student_room.student_id=student.id " \
+                                     "GROUP BY room.name ORDER BY Difference DESC LIMIT 5",
 
-    'difference_students_sex': "SELECT room.name FROM room LEFT JOIN student_room " \
-                    "ON student_room.room_id=room.id LEFT JOIN student " \
-                    "ON student.id=student_room.student_id GROUP BY room.name " \
-                    "HAVING MAX(student.sex)!=MIN(student.sex)"
+    'difference_students_sex':  "SELECT room.name FROM room LEFT JOIN student_room " \
+                                "ON student_room.room_id=room.id LEFT JOIN student " \
+                                "ON student.id=student_room.student_id GROUP BY room.name " \
+                                "HAVING MAX(student.sex)!=MIN(student.sex)"
 }
 
 
