@@ -30,20 +30,16 @@ def create_tables(connection, cursor):
     return True
 
 
+def drop_student_table(connection, cursor, table_name):
+    cursor.execute(f"DROP TABLE {table_name};")
+    connection.commit()
+    print(f"Table {table_name} drop successfully")
+
+
 def drop_tables(connection, cursor):
+    table_names = ['student', 'room', 'student_room']
 
-    cursor.execute("DROP TABLE student;")
-    connection.commit()
-    print("Table student drop successfully")
-
-    cursor.execute("DROP TABLE room;")
-    connection.commit()
-
-    print("Table room created successfully")
-
-    cursor.execute("DROP TABLE student_room;")
-    connection.commit()
-    print("Table student_room drop successfully")
+    [drop_student_table(connection, cursor, table_name) for table_name in table_names]
     return True
 
 
@@ -110,7 +106,7 @@ def insert_data_into_tables(connection, cursor):
 def get_rooms_and_the_number_of_students(_connection, cursor):
     sql_query = "SELECT room.name, COUNT(student_room.student_id) as 'students'" \
                 " FROM room left JOIN student_room on student_room.room_id=room.id " \
-                "GROUP BY room.name ORDER BY room.id"
+                "GROUP BY room.name"
 
     cursor.execute(sql_query)
     rows = cursor.fetchall()
@@ -157,7 +153,10 @@ def get_top5_biggest_difference_in_the_age_rooms(_connection, cursor):
 
 
 def get_rooms_with_difference_students_sex(_connection, cursor):
-    sql_query = ""
+    sql_query = "SELECT room.name FROM room LEFT JOIN student_room " \
+                "ON student_room.room_id=room.id LEFT JOIN student " \
+                "ON student.id=student_room.student_id GROUP BY room.name " \
+                "HAVING MAX(student.sex)!=MIN(student.sex)"
 
     cursor.execute(sql_query)
     rows = cursor.fetchall()
