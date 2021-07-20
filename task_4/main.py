@@ -61,12 +61,11 @@ try:
             result = handler(db_helper)
 
             if not result:
+                print('Bye!')
                 break
 
     finally:
         db_helper.__disconnect__()
-        print('Bye!')
-
 
 except Exception as ex:
     print("Connection refused..")

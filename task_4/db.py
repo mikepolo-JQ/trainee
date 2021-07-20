@@ -1,42 +1,49 @@
 import json
 import time
+from typing import Union, Tuple
+
 import pymysql
 import conf as settings
 
 sql_queries = {
-    'create_student': "create table student(id int primary key," \
-                      "name varchar(40)," \
-                      "birthday datetime, " \
+    'create_student': "create table student(id int primary key,"
+                      "name varchar(40),"
+                      "birthday datetime, "
                       "sex varchar(2));",
 
-    'create_room': "create table room(id int primary key," \
+    'create_room': "create table room(id int primary key,"
                    "name varchar(40));",
 
-    'create_student_room': "create table student_room(id serial primary key," \
-                           "student_id integer references student(id)," \
+    'create_student_room': "create table student_room(id serial primary key,"
+                           "student_id integer references student(id),"
                            "room_id integer references room(id));",
 
-    'get_room_name_and_count_of_students':  "SELECT room.name, COUNT(student_room.student_id) as 'students'" \
-                                            " FROM room left JOIN student_room on student_room.room_id=room.id " \
+    'get_room_name_and_count_of_students':  "SELECT room.name, COUNT(student_room.student_id) as 'students'"
+                                            " FROM room left JOIN student_room on student_room.room_id=room.id "
                                             "GROUP BY room.name",
 
-    'get_top5_young_rooms': "SELECT room.name, AVG(YEAR(CURRENT_DATE)-YEAR(student.birthday))" \
-                            " AS AverageAge FROM room INNER JOIN student_room " \
-                            "on room.id=student_room.room_id INNER JOIN student " \
-                            "on student_room.student_id=student.id " \
-                            "GROUP BY room.name ORDER BY AverageAge LIMIT 5",
+    'get_top5_young_rooms': "SELECT room.name FROM room INNER JOIN student_room on room.id=student_room.room_id "
+                            "INNER JOIN student on student_room.student_id=student.id GROUP BY room.name "
+                            "ORDER BY AVG(YEAR(CURRENT_DATE)-YEAR(student.birthday)) LIMIT 5;",
 
-    'biggest_difference_in_the_age': "SELECT room.name, YEAR(MAX(student.birthday))-" \
-                                     "YEAR(MIN(student.birthday)) as Difference from room " \
-                                     "LEFT JOIN student_room on student_room.room_id=room.id " \
-                                     "LEFT JOIN student on student_room.student_id=student.id " \
+    'biggest_difference_in_the_age': "SELECT room.name, YEAR(MAX(student.birthday))-"
+                                     "YEAR(MIN(student.birthday)) as Difference from room "
+                                     "LEFT JOIN student_room on student_room.room_id=room.id "
+                                     "LEFT JOIN student on student_room.student_id=student.id "
                                      "GROUP BY room.name ORDER BY Difference DESC LIMIT 5",
 
-    'difference_students_sex':  "SELECT room.name FROM room LEFT JOIN student_room " \
-                                "ON student_room.room_id=room.id LEFT JOIN student " \
-                                "ON student.id=student_room.student_id GROUP BY room.name " \
+    'difference_students_sex':  "SELECT room.name FROM room LEFT JOIN student_room "
+                                "ON student_room.room_id=room.id LEFT JOIN student "
+                                "ON student.id=student_room.student_id GROUP BY room.name "
                                 "HAVING MAX(student.sex)!=MIN(student.sex)"
 }
+
+
+def view_result(file_name: str, data: Union[dict, list], total_time: str) -> None:
+    with open(f'task_4/{file_name}.json', 'w') as result_file:
+        json.dump(data, result_file)
+
+    print(f'Result in {file_name}.json\nTotal time: {total_time}')
 
 
 class DB:
@@ -57,16 +64,20 @@ class DB:
         self.connection.close()
         print('Connection close...')
 
-    def __execute_and_commit(self, sql_query: str):
+    def __execute_and_commit(self, sql_query: str) -> None:
         with self.connection.cursor() as cursor:
             cursor.execute(sql_query)
             self.connection.commit()
 
-    def __fetchall(self, sql_query: str):
+    def __fetchall(self, sql_query: str) -> Tuple[Union[dict, list], str]:
         with self.connection.cursor() as cursor:
+            start = time.time()
+
             cursor.execute(sql_query)
             rows = cursor.fetchall()
-            return rows
+
+            finish = time.time()
+            return rows, f'{finish-start:.2f}'
 
     # create tables
     def create_table(self) -> bool:
@@ -93,7 +104,7 @@ class DB:
 
         return True
 
-    # insert data from student.json to the database
+    # INSERT data from student.json to the database
     def insert_from_student_json(self):
 
         with open('task_4/students.json') as student_file:
@@ -121,7 +132,7 @@ class DB:
         finish = time.time()
         print(f"Insert in student_room successfully!\nTotal time: {finish - start:.2f}")
 
-    # insert data from room.json to the database
+    # INSERT data from room.json to the database
     def insert_from_room_json(self):
 
         with open('task_4/rooms.json') as room_file:
@@ -141,52 +152,51 @@ class DB:
         finish = time.time()
         print(f"Insert room successfully! Total time: {finish - start:.2f}")
 
-    def insert_data(self):
+    def insert_data(self) -> bool:
         self.insert_from_student_json()
         self.insert_from_room_json()
         return True
 
-    # database queries
-    def print_rooms_and_the_number_of_students(self):
+    # database QUERIES
+    def print_rooms_and_the_number_of_students(self) -> bool:
         sql_query = sql_queries['get_room_name_and_count_of_students']
+        file_name = 'room_and_number_of_students'
 
-        rows = self.__fetchall(sql_query)
+        rows, tot_time = self.__fetchall(sql_query)
 
-        print('\tROOM NAME\tSTUDENTS COUNT')
-        for row in rows:
-            print(f"\t{row['name']}\t{row['students']}")
+        view_result(file_name, data=rows, total_time=tot_time)
 
         return True
 
-    def print_top5_young_rooms(self):
+    # QUERIES
+    def print_top5_young_rooms(self) -> bool:
         sql_query = sql_queries['get_top5_young_rooms']
+        file_name = 'top5_young_rooms'
 
-        rows = self.__fetchall(sql_query)
+        rows, tot_time = self.__fetchall(sql_query)
 
-        print('\tROOM NAME\tAVERAGE AGE')
-        for row in rows:
-            print(f"\t{row['name']}\t{row['AverageAge']}")
+        view_result(file_name, data=rows, total_time=tot_time)
 
         return True
 
-    def print_top5_rooms_with_the_biggest_difference_in_the_age(self):
+    # QUERIES
+    def print_top5_rooms_with_the_biggest_difference_in_the_age(self) -> bool:
         sql_query = sql_queries['biggest_difference_in_the_age']
+        file_name = 'top5_rooms_with_the_biggest_difference_in_the_age'
 
-        rows = self.__fetchall(sql_query)
+        rows, tot_time = self.__fetchall(sql_query)
 
-        print('\tROOM NAME\tDIFFERENCE')
-        for row in rows:
-            print(f"\t{row['name']}\t{row['Difference']}")
+        view_result(file_name, data=rows, total_time=tot_time)
 
         return True
 
-    def print_rooms_with_difference_students_sex(self):
+    # QUERIES
+    def print_rooms_with_difference_students_sex(self) -> bool:
         sql_query = sql_queries['difference_students_sex']
+        file_name = 'rooms_with_difference_students_sex'
 
-        rows = self.__fetchall(sql_query)
+        rows, tot_time = self.__fetchall(sql_query)
 
-        print('\tROOM NAME')
-        for row in rows:
-            print(f"\t{row['name']}")
+        view_result(file_name, data=rows, total_time=tot_time)
 
         return True
