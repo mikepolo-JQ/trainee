@@ -22,9 +22,9 @@ sql_queries = {
                                             " FROM room left JOIN student_room on student_room.room_id=room.id "
                                             "GROUP BY room.name",
 
-    'get_top5_young_rooms': "SELECT room.name FROM room INNER JOIN student_room on room.id=student_room.room_id "
-                            "INNER JOIN student on student_room.student_id=student.id GROUP BY room.name "
-                            "ORDER BY AVG(YEAR(CURRENT_DATE)-YEAR(student.birthday)) LIMIT 5;",
+    'get_top5_youngest_rooms':  "SELECT room.name FROM room INNER JOIN student_room on room.id=student_room.room_id "
+                                "INNER JOIN student on student_room.student_id=student.id GROUP BY room.name "
+                                "ORDER BY AVG(YEAR(CURRENT_DATE)-YEAR(student.birthday)) LIMIT 5;",
 
     'biggest_difference_in_the_age': "SELECT room.name, YEAR(MAX(student.birthday))-"
                                      "YEAR(MIN(student.birthday)) as Difference from room "
@@ -105,7 +105,7 @@ class DB:
         return True
 
     # INSERT data from student.json to the database
-    def insert_from_student_json(self):
+    def insert_from_student_json(self) -> None:
 
         with open('task_4/students.json') as student_file:
             student_data = json.load(student_file)
@@ -133,7 +133,7 @@ class DB:
         print(f"Insert in student_room successfully!\nTotal time: {finish - start:.2f}")
 
     # INSERT data from room.json to the database
-    def insert_from_room_json(self):
+    def insert_from_room_json(self) -> None:
 
         with open('task_4/rooms.json') as room_file:
             room_data = json.load(room_file)
@@ -169,9 +169,9 @@ class DB:
         return True
 
     # QUERIES
-    def print_top5_young_rooms(self) -> bool:
-        sql_query = sql_queries['get_top5_young_rooms']
-        file_name = 'top5_young_rooms'
+    def print_top5_youngest_rooms(self) -> bool:
+        sql_query = sql_queries['get_top5_youngest_rooms']
+        file_name = 'top5_youngest_rooms'
 
         rows, tot_time = self.__fetchall(sql_query)
 

@@ -36,7 +36,7 @@ command_dict = {
     '?': print_command_list,
 
     '1': DB.print_rooms_and_the_number_of_students,
-    '2': DB.print_top5_young_rooms,
+    '2': DB.print_top5_youngest_rooms,
     '3': DB.print_top5_rooms_with_the_biggest_difference_in_the_age,
     '4': DB.print_rooms_with_difference_students_sex
 }
