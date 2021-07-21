@@ -6,12 +6,12 @@ import pymysql
 import conf as settings
 
 sql_queries = {
-    'create_student': "create table student(id int primary key AUTO_INCREMENT,"
+    'create_student': "create table student(id int primary key,"
                       "name varchar(40),"
                       "birthday datetime, "
                       "sex varchar(2));",
 
-    'create_room': "create table room(id int primary key AUTO_INCREMENT,"
+    'create_room': "create table room(id int primary key,"
                    "name varchar(40));",
 
     'create_student_room': "create table student_room(id serial primary key AUTO_INCREMENT,"
@@ -120,7 +120,7 @@ class DB:
 
         start = time.time()
         for student in student_data:
-            values += f"('{student['name']}', '{student['birthday']}', '{student['sex']}')"
+            values += f"({student['id']}, '{student['name']}', '{student['birthday']}', '{student['sex']}')"
 
             values_for_student_room += f"({student['id']}, {student['room']})"
 
@@ -128,7 +128,7 @@ class DB:
                 values += ', '
                 values_for_student_room += ', '
 
-        self.__execute_and_commit("insert student(name, birthday, sex) values " + values + ';')
+        self.__execute_and_commit("insert student(id, name, birthday, sex) values " + values + ';')
         print('Insert in student successfully.')
 
         self.__execute_and_commit("insert student_room(student_id, room_id) values " +
@@ -147,12 +147,12 @@ class DB:
 
         start = time.time()
         for room in room_data:
-            values += f"('{room['name']}')"
+            values += f"({room['id']}, '{room['name']}')"
 
             if room['id'] != room_data[-1]['id']:
                 values += ', '
 
-        self.__execute_and_commit("insert room(name) values " + values + ';')
+        self.__execute_and_commit("insert room(id, name) values " + values + ';')
 
         finish = time.time()
         print(f"Insert room successfully! Total time: {finish - start:.2f}")
