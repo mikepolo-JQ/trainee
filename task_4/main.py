@@ -12,7 +12,9 @@ clear\t\tClear the terminal\n
 1\t\tGet list of rooms and the number of students in each of them
 2\t\tGet top 5 rooms with the smallest average age of students
 3\t\tGet top 5 rooms with the biggest difference in the age of students
-4\t\tGet list of rooms where students of different sexes live
+4\t\tGet list of rooms where students of different sexes live\n
+add_index\tAdd index
+drop_index\tDelete index
 """
 
 
@@ -38,7 +40,10 @@ command_dict = {
     '1': DB.print_rooms_and_the_number_of_students,
     '2': DB.print_top5_youngest_rooms,
     '3': DB.print_top5_rooms_with_the_biggest_difference_in_the_age,
-    '4': DB.print_rooms_with_difference_students_sex
+    '4': DB.print_rooms_with_difference_students_sex,
+
+    'add_index': DB.add_indexes,
+    'drop_index': DB.drop_indexes,
 }
 
 

@@ -6,15 +6,15 @@ import pymysql
 import conf as settings
 
 sql_queries = {
-    'create_student': "create table student(id int primary key,"
+    'create_student': "create table student(id int primary key AUTO_INCREMENT,"
                       "name varchar(40),"
                       "birthday datetime, "
                       "sex varchar(2));",
 
-    'create_room': "create table room(id int primary key,"
+    'create_room': "create table room(id int primary key AUTO_INCREMENT,"
                    "name varchar(40));",
 
-    'create_student_room': "create table student_room(id serial primary key,"
+    'create_student_room': "create table student_room(id serial primary key AUTO_INCREMENT,"
                            "student_id integer references student(id),"
                            "room_id integer references room(id));",
 
@@ -35,7 +35,12 @@ sql_queries = {
     'difference_students_sex':  "SELECT room.name FROM room LEFT JOIN student_room "
                                 "ON student_room.room_id=room.id LEFT JOIN student "
                                 "ON student.id=student_room.student_id GROUP BY room.name "
-                                "HAVING MAX(student.sex)!=MIN(student.sex)"
+                                "HAVING MAX(student.sex)!=MIN(student.sex)",
+
+
+    'add_indexes_list': ["create index idx_student_room on student_room(student_id, room_id);", ],
+
+    'drop_indexes_list': ["drop index idx_student_room on student_room;", ],
 }
 
 
@@ -115,7 +120,7 @@ class DB:
 
         start = time.time()
         for student in student_data:
-            values += f"({student['id']}, '{student['name']}', '{student['birthday']}', '{student['sex']}')"
+            values += f"('{student['name']}', '{student['birthday']}', '{student['sex']}')"
 
             values_for_student_room += f"({student['id']}, {student['room']})"
 
@@ -123,7 +128,7 @@ class DB:
                 values += ', '
                 values_for_student_room += ', '
 
-        self.__execute_and_commit("insert student(id, name, birthday, sex) values " + values + ';')
+        self.__execute_and_commit("insert student(name, birthday, sex) values " + values + ';')
         print('Insert in student successfully.')
 
         self.__execute_and_commit("insert student_room(student_id, room_id) values " +
@@ -142,12 +147,12 @@ class DB:
 
         start = time.time()
         for room in room_data:
-            values += f"({room['id']}, '{room['name']}')"
+            values += f"('{room['name']}')"
 
             if room['id'] != room_data[-1]['id']:
                 values += ', '
 
-        self.__execute_and_commit("insert room(id, name) values " + values + ';')
+        self.__execute_and_commit("insert room(name) values " + values + ';')
 
         finish = time.time()
         print(f"Insert room successfully! Total time: {finish - start:.2f}")
@@ -198,5 +203,31 @@ class DB:
         rows, tot_time = self.__fetchall(sql_query)
 
         view_result(file_name, data=rows, total_time=tot_time)
+
+        return True
+
+    # INDEXES ADDING
+    def add_indexes(self) -> bool:
+        queries = sql_queries['add_indexes_list']
+
+        for query in queries:
+            if not query:
+                continue
+            _rows, _tot_time = self.__fetchall(query)
+
+        print("Indexes added successfully.")
+
+        return True
+
+    # INDEXES DELETING
+    def drop_indexes(self) -> bool:
+        queries = sql_queries['drop_indexes_list']
+
+        for query in queries:
+            if not query:
+                continue
+            _rows, _tot_time = self.__fetchall(query)
+
+        print("Indexes were successfully deleted.")
 
         return True
